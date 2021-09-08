@@ -99,5 +99,27 @@ def hist_eq(image: ImageType, showCdf=False):
         plt.legend(('cdf', 'histogram'), loc='upper left')
         plt.savefig(image.folder_path + "/" + image.name_image +
                     '-cdf.png')
+    return
 
+
+def laplace(image: ImageType, filterType: int):
+
+    # Question 3.1
+    if(filterType == 1):
+        kernel = np.array([[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]])
+        dst = cv.filter2D(image.image, cv.CV_16S, kernel)
+    # Question 3.2
+    elif(filterType == 2):
+        gaussian = cv.GaussianBlur(image.image, (3, 3), 0.5)
+        kernel = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
+        dst = cv.filter2D(gaussian, cv.CV_16S, kernel)
+    # Question 3.3
+    else:
+        gaussian = cv.GaussianBlur(image.image, (3, 3), 1)
+        kernel = np.array([[0, 1, 0], [1, -4, 1], [0, 1, 0]])
+        dst = cv.filter2D(gaussian, cv.CV_16S, kernel)
+
+    # Save edited images.
+    cv.imwrite(image.folder_path + "/" + image.name_image +
+               '-filtered.png', np.hstack((image.image, dst)))
     return
