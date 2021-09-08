@@ -1,13 +1,21 @@
 import numpy as np
 import cv2 as cv
+from matplotlib import pyplot as plt
 
 
-def dec_int(image, folder_path, name_image):
+class ImageType:
+    def __init__(self, image, folder_path, name_image):
+        self.image = image
+        self.folder_path = folder_path
+        self.name_image = name_image
+
+
+def dec_int(image: ImageType):
     # Resize
     scale = 0.5
 
-    original_width = image.shape[0]
-    original_height = image.shape[1]
+    original_width = image.image.shape[0]
+    original_height = image.image.shape[1]
 
     width = int(original_width*scale)
     height = int(original_height*scale)
@@ -19,10 +27,11 @@ def dec_int(image, folder_path, name_image):
 
     for i in range(width-1):
         for j in range(height-1):
-            imageResized[i + 1, j + 1] = image[1 + int(i / xNearestNeighbour),
-                                               1 + int(j / yNearestNeighbour)]
+            imageResized[i + 1, j + 1] = image.image[1 + int(i / xNearestNeighbour),
+                                                     1 + int(j / yNearestNeighbour)]
 
-    cv.imwrite(folder_path + "/" + name_image + "-resized.png", imageResized)
+    cv.imwrite(image.folder_path + "/" + image.name_image +
+               "-resized.png", imageResized)
 
     # Interpolation
     original_width = imageResized.shape[0]
@@ -41,9 +50,54 @@ def dec_int(image, folder_path, name_image):
             imageInterpolated[i + 1, j + 1] = imageResized[1 + int(i / xNearestNeighbour),
                                                            1 + int(j / yNearestNeighbour)]
 
-    cv.imwrite(folder_path + "/" + name_image +
-               "-interpolated.png", imageInterpolated)
+    cv.imwrite(image.folder_path + "/" + image.name_image +
+               "-interpolated.png", np.hstack((image.image, imageInterpolated)))
 
 
 def egde_improv():
+    return
+
+
+def power_law(image: ImageType, values):
+    for gamma in values:
+        # Apply gamma correction.
+        gamma_corrected = np.array(
+            255*(image.image / 255) ** gamma, dtype='uint8')
+        # Save edited images.
+        cv.imwrite(image.folder_path + "/" + image.name_image +
+                   '-gamma_transformed'+str(gamma)+'.png', np.hstack((image.image, gamma_corrected)))
+    return
+
+
+def hist_eq(image: ImageType, showCdf=False):
+    image.image = cv.cvtColor(image.image, cv.COLOR_BGR2GRAY)
+    hist_corrected = cv.equalizeHist(image.image)
+
+    # Save edited images.
+    cv.imwrite(image.folder_path + "/" + image.name_image +
+               '-equalized.png', np.hstack((image.image, hist_corrected)))
+
+    if(showCdf):
+        # Original Image
+        hist, bins = np.histogram(image.image.flatten(), 256, [0, 256])
+        cdf1 = hist.cumsum()
+        cdf_normalized = cdf1 * float(hist.max()) / cdf1.max()
+        plt.plot(cdf_normalized, color='b')
+        plt.hist(image.image.flatten(), 256, [0, 256], color='r')
+        plt.xlim([0, 256])
+        plt.legend(('cdf', 'histogram'), loc='upper left')
+        plt.savefig(image.folder_path + "/" + image.name_image +
+                    '-original.png')
+
+        # Equalized Image
+        hist, bins = np.histogram(hist_corrected.flatten(), 256, [0, 256])
+        cdf2 = hist.cumsum()
+        cdf_normalized = cdf2 * float(hist.max()) / cdf2.max()
+        plt.plot(cdf_normalized, color='b')
+        plt.hist(hist_corrected.flatten(), 256, [0, 256], color='r')
+        plt.xlim([0, 256])
+        plt.legend(('cdf', 'histogram'), loc='upper left')
+        plt.savefig(image.folder_path + "/" + image.name_image +
+                    '-cdf.png')
+
     return
