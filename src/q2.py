@@ -28,6 +28,6 @@ def question_2():
 
     # Question 2.2
 
-    # hist_eq(ImageType(img1, "q2/2.2", "car"), True)
-    # hist_eq(ImageType(img2, "q2/2.2", "crowd"), True)
+    hist_eq(ImageType(img1, "q2/2.2", "car"))
+    hist_eq(ImageType(img2, "q2/2.2", "crowd"))
     hist_eq(ImageType(img3, "q2/2.2", "university"), True)

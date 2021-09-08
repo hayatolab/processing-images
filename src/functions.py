@@ -80,25 +80,31 @@ def hist_eq(image: ImageType, showCdf=False):
     if(showCdf):
         # Original Image
         hist, bins = np.histogram(image.image.flatten(), 256, [0, 256])
-        cdf1 = hist.cumsum()
-        cdf_normalized = cdf1 * float(hist.max()) / cdf1.max()
+        cdf = hist.cumsum()
+        cdf_normalized = cdf * float(hist.max()) / cdf.max()
         plt.plot(cdf_normalized, color='b')
         plt.hist(image.image.flatten(), 256, [0, 256], color='r')
         plt.xlim([0, 256])
+        plt.grid()
+        plt.title('Antes - Histograma e CDF ')
         plt.legend(('cdf', 'histogram'), loc='upper left')
         plt.savefig(image.folder_path + "/" + image.name_image +
-                    '-original.png')
+                    '-before.png')
+        plt.close()
 
         # Equalized Image
         hist, bins = np.histogram(hist_corrected.flatten(), 256, [0, 256])
-        cdf2 = hist.cumsum()
-        cdf_normalized = cdf2 * float(hist.max()) / cdf2.max()
+        cdf = hist.cumsum()
+        cdf_normalized = cdf * float(hist.max()) / cdf.max()
         plt.plot(cdf_normalized, color='b')
         plt.hist(hist_corrected.flatten(), 256, [0, 256], color='r')
         plt.xlim([0, 256])
+        plt.grid()
+        plt.title('Depois - Histograma e CDF ')
         plt.legend(('cdf', 'histogram'), loc='upper left')
         plt.savefig(image.folder_path + "/" + image.name_image +
-                    '-cdf.png')
+                    '-after.png')
+        plt.close()
     return
 
 
